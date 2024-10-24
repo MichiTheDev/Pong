@@ -9,19 +9,27 @@ namespace Twode.Pong
         public event Action<int> OnGoalTouched;
 
         [SerializeField, Range(5f, 85f)] private float _maxBounceAngle = 60f;
+        [SerializeField] private float _additionalSpeedAfterCollision = 0.2f;
         
         private Vector2 _velocity;
-        
+        private float _actualSpeed;
+
+        private void Start()
+        {
+            Reset();
+        }
+
         // 0 (left side won) = direction right, 1 (right side won) = direction left
         public void Launch(int direction)
         {
-            UpdateVelocity(speed * Mathf.Sign(direction) * Vector2.one);
+            UpdateVelocity(_actualSpeed * (Mathf.Sign(direction) * Vector2.one.normalized));
         }
 
         public void Reset()
         {
             UpdateVelocity(Vector2.zero);
             transform.position = Vector3.zero;
+            _actualSpeed = baseSpeed;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -40,6 +48,8 @@ namespace Twode.Pong
             
             if(other.collider.CompareTag("Paddle"))
             {
+                _actualSpeed += _additionalSpeedAfterCollision;
+                
                 Bounds paddleBounds = other.collider.bounds;
                 Vector2 contactPoint = other.contacts[0].point;
                 
@@ -49,7 +59,7 @@ namespace Twode.Pong
                 float bounceAngle = normalizedRelativeIntersectionY * _maxBounceAngle * Mathf.Deg2Rad;
                 
                 Vector2 newDirection = new Vector2(Mathf.Sign(_velocity.x) * -1, Mathf.Sin(bounceAngle)).normalized;
-                UpdateVelocity(newDirection * _velocity.magnitude);
+                UpdateVelocity(newDirection * _actualSpeed);
             }
         }
 

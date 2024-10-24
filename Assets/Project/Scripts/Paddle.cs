@@ -15,7 +15,7 @@ namespace Twode.Pong
                 return;
             }
             
-            rb.linearVelocityY = speed * _direction;
+            rb.linearVelocityY = baseSpeed * _direction;
         }
         
         public void SetMovementInputActions(in InputAction inputAction)

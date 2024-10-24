@@ -199,14 +199,12 @@ namespace Twode.Pong
 
             void SpawnGoals()
             {
-                const float halfPadding = PADDLE_SPAWN_PADDING / 2.0f;
-                
                 GameObject leftGoal = new GameObject("Left Goal");
-                leftGoal.transform.position = new Vector3(-halfScreenWidth + halfPadding, 0f);
+                leftGoal.transform.position = new Vector3(-halfScreenWidth, 0f);
                 leftGoal.tag = "Goal";
                 
                 GameObject rightGoal = new GameObject("Right Goal");
-                rightGoal.transform.position = new Vector3(halfScreenWidth - halfPadding, 0f);
+                rightGoal.transform.position = new Vector3(halfScreenWidth, 0f);
                 rightGoal.tag = "Goal";
                 
                 BoxCollider2D leftCollider = leftGoal.AddComponent<BoxCollider2D>()!;

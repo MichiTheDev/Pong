@@ -8,7 +8,7 @@ namespace Twode.Pong
     {
         public bool Freezed { get; private set; }
 
-        [SerializeField] protected float speed;
+        [SerializeField] protected float baseSpeed;
 
         [NotNull] protected Rigidbody2D rb { get; private set; } = null!;
 

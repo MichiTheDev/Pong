@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Twode.Pong
@@ -21,15 +22,6 @@ namespace Twode.Pong
         {
             base.Awake();
             _collider = GetComponent<BoxCollider2D>();
-        }
-
-        // This must be done to fix a very weird bug. Pardon
-        private void FixedUpdate()
-        {
-            if(Mathf.Approximately(rb.linearVelocityY, 0))
-            {
-                rb.linearVelocityY = transform.position.y < 0 ? 0.1f : -0.1f;
-            }
         }
 
         public void Launch(int direction)
@@ -80,6 +72,8 @@ namespace Twode.Pong
             {
                 SetVelocity(new Vector2(_velocity.x, -_velocity.y));
             }
+
+            StartCoroutine(FixBallRoutine());
         }
 
         private void SetVelocity(Vector2 velocity)
@@ -96,6 +90,17 @@ namespace Twode.Pong
         protected override void OnUnfreeze()
         {
             rb.linearVelocity = _velocity;
+        }
+
+        // Sometimes the ball stays on bottom or upper border for some weird reason. This fixes it. Pardon
+        private IEnumerator FixBallRoutine()
+        {
+            // These are the only magic numbers is use. Calm down x-x
+            yield return new WaitForSeconds(0.25f);
+            if(Mathf.Approximately(rb.linearVelocityY, 0))
+            {
+                rb.linearVelocityY = transform.position.y < 0 ? 0.5f : -0.5f;
+            }
         }
     }
 }

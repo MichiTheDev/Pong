@@ -15,5 +15,10 @@ namespace TwodeUtils
             }
             Instance = this as T;
         }
+
+        protected virtual void OnDestroy()
+        {
+            Instance = null;
+        }
     }
 }

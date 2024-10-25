@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using TwodeUtils;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 namespace Twode.Pong
 {
@@ -42,6 +41,12 @@ namespace Twode.Pong
             InitializeLevel();
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            _input.Dispose();
+        }
+
         #region Game Logic
 
         public void StartGame()
@@ -58,7 +63,7 @@ namespace Twode.Pong
         {
             switch(GameState)
             {
-                case GameState.Idle: break;
+                case GameState.Idle: return;
                 case GameState.Playing: break;
                 case GameState.Paused:
                     ResumeGame();
@@ -68,6 +73,7 @@ namespace Twode.Pong
             }
             
             FreezeObjects();
+            SetGameState(GameState.Paused);
             OnGamePaused?.Invoke();
         }
 
@@ -83,6 +89,7 @@ namespace Twode.Pong
             }
             
             UnfreezeObjects();
+            SetGameState(GameState.Playing);
             OnGameResumed?.Invoke();
         }
         

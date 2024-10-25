@@ -8,12 +8,12 @@ namespace Twode.Pong
         
         public Paddle Paddle { get; set; }
 
-        private bool _canMove;
+        private bool _inputEnabled;
         private Transform _target;
 
         private void Update()
         {
-            if(Paddle is null || !_canMove || Paddle.Freezed || _target is null) return;
+            if(Paddle is null || !_inputEnabled || _target is null) return;
             
             float distance = _target.transform.position.y - transform.position.y;
             float speedFactor = Mathf.Abs(distance) < SLOW_DOWN_THRESHOLD ? Mathf.Abs(distance / SLOW_DOWN_THRESHOLD) : 1f;
@@ -22,7 +22,7 @@ namespace Twode.Pong
 
         public void SetInputEnabled(bool inputEnabled)
         {
-            _canMove = inputEnabled;
+            _inputEnabled = inputEnabled;
         }
 
         public void SetTarget(Transform target)

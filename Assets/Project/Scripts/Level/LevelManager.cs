@@ -24,7 +24,6 @@ namespace Twode.Pong
         
         [SerializeField] private Ball _ballPrefab;
         [SerializeField] private Paddle _paddlePrefab;
-        [SerializeField] private SpriteRenderer _middleLinePrefab;
 
         [NotNull] private GameInput _input = null!;
         
@@ -34,7 +33,7 @@ namespace Twode.Pong
         
         private int _leftScore;
         private int _rightScore;
-        private int _lastWinner;
+        private int _lastWinner = -1;
         
         protected override void Awake()
         {
@@ -93,7 +92,7 @@ namespace Twode.Pong
                 Debug.LogError("Ball is null.");
                 return;
             }
-            _ball.Launch(_lastWinner);
+            _ball.Launch(_lastWinner < 0 ? 1 : -1);
         }
 
         private void ResetObjects()
@@ -135,9 +134,9 @@ namespace Twode.Pong
         
         private void GoalTouched(int side)
         {
-            _lastWinner = side;
-            int leftScore = side < 0 ? _leftScore + 1 : _leftScore;
-            int rightScore = side > 0 ? _rightScore + 1 : _rightScore;
+            _lastWinner = side < 0 ? 1 : -1;
+            int leftScore = side < 0 ? _leftScore : _leftScore + 1;
+            int rightScore = side > 0 ? _rightScore : _rightScore  + 1;
             
             SetScore(leftScore, rightScore);
             SetGameState(GameState.Idle);
@@ -179,7 +178,6 @@ namespace Twode.Pong
             SpawnBall();
             SpawnGoals();
             SpawnLevelBorders();
-            SpawnMiddleLine();
             
             return;
             void SpawnPaddles()
@@ -229,12 +227,6 @@ namespace Twode.Pong
 
                 BoxCollider2D bottomCollider = bottomBorder.AddComponent<BoxCollider2D>()!;
                 bottomCollider.size = new Vector2(screenWidth, 1f);
-            }
-
-            void SpawnMiddleLine()
-            {
-                SpriteRenderer middleLine = Instantiate(_middleLinePrefab)!;
-                middleLine.size = new Vector2(0.125f, screenHeight);
             }
         }
 

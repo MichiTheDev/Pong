@@ -5,13 +5,13 @@ namespace Twode.Pong
 {
     public sealed class Ball : PongObject
     {
-        // 0 = left, 1 = right
+        // -1 = left, 1 = right
         public event Action<int> OnGoalTouched;
 
         [SerializeField, Range(5f, 85f)] private float _maxBounceAngle = 60f;
         [SerializeField] private float _additionalSpeedAfterCollision = 0.2f;
 
-        // 0 (left side won) = direction right, 1 (right side won) = direction left
+        // -1 (left side won) = direction right, 1 (right side won) = direction left
         public void Launch(int direction)
         {
             Move(Mathf.Sign(direction) * Vector2.one.normalized);
@@ -23,7 +23,7 @@ namespace Twode.Pong
 
             if(other.CompareTag("Goal"))
             {
-                OnGoalTouched?.Invoke(transform.position.x < 0 ? 0 : 1);
+                OnGoalTouched?.Invoke(transform.position.x < 0 ? -1 : 1);
             }
         }
 

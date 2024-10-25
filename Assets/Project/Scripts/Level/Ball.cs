@@ -23,6 +23,15 @@ namespace Twode.Pong
             _collider = GetComponent<BoxCollider2D>();
         }
 
+        // This must be done to fix a very weird bug. Pardon
+        private void FixedUpdate()
+        {
+            if(Mathf.Approximately(rb.linearVelocityY, 0))
+            {
+                rb.linearVelocityY = transform.position.y < 0 ? 0.1f : -0.1f;
+            }
+        }
+
         public void Launch(int direction)
         {
             SetVelocity(Speed * (Mathf.Sign(direction) * Vector2.one.normalized).normalized);

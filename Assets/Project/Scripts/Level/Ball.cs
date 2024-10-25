@@ -95,7 +95,7 @@ namespace Twode.Pong
         // Sometimes the ball stays on bottom or upper border for some weird reason. This fixes it. Pardon
         private IEnumerator FixBallRoutine()
         {
-            // These are the only magic numbers is use. Calm down x-x
+            // These are the only magic numbers in use. Calm down x-x
             yield return new WaitForSeconds(0.25f);
             if(Mathf.Approximately(rb.linearVelocityY, 0))
             {

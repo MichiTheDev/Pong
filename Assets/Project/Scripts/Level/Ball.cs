@@ -97,7 +97,7 @@ namespace Twode.Pong
         {
             // These are the only magic numbers is use. Calm down x-x
             yield return new WaitForSeconds(0.25f);
-            if(Mathf.Approximately(rb.linearVelocityY, 0))
+            if(!Freezed && Mathf.Approximately(rb.linearVelocityY, 0))
             {
                 rb.linearVelocityY = transform.position.y < 0 ? 0.5f : -0.5f;
             }

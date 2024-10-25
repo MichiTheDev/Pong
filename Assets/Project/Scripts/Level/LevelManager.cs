@@ -285,6 +285,21 @@ namespace Twode.Pong
         private void SetGameState(GameState newGameState)
         {
             GameState = newGameState;
+
+            switch(GameState)
+            {
+                case GameState.Idle:
+                    Cursor.visible = true;
+                    break;
+                case GameState.Playing:
+                    Cursor.visible = false;
+                    break;
+                case GameState.Paused:
+                    Cursor.visible = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         private void SetScore(int leftScore, int rightScore)

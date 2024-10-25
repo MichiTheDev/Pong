@@ -5,19 +5,8 @@ namespace Twode.Pong
 {
     public sealed class Paddle : PongObject
     {
-        private float _direction;
-        
-        private void FixedUpdate()
-        {
-            if(Freezed)
-            {
-                rb.linearVelocityY = 0f;
-                return;
-            }
-            
-            rb.linearVelocityY = baseSpeed * _direction;
-        }
-        
+        private InputAction _movementInputAction;
+
         public void SetMovementInputActions(in InputAction inputAction)
         {
             if(inputAction is null)
@@ -25,19 +14,28 @@ namespace Twode.Pong
                 Debug.LogWarning("For some reason the given inputAction is null :(");
                 return;
             }
-            
-            inputAction.performed += MovementInput;   
-            inputAction.canceled += MovementInput;   
+
+            _movementInputAction = inputAction;
+            _movementInputAction.performed += MovementInput;   
+            _movementInputAction.canceled += MovementInput;   
         }
 
         public void EnableAI()
         {
             
         }
+
+        public void SetInputEnabled(bool inputEnabled)
+        {
+            if(_movementInputAction is null) return;
+            
+            if(inputEnabled) _movementInputAction.Enable();
+            else _movementInputAction.Disable();
+        }
         
         private void MovementInput(InputAction.CallbackContext context)
         {
-            _direction = context.ReadValue<float>();
+            Move(new Vector2(0f, context.ReadValue<float>())); 
         }
     }
 }

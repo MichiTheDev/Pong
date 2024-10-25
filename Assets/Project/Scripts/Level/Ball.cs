@@ -10,28 +10,13 @@ namespace Twode.Pong
 
         [SerializeField, Range(5f, 85f)] private float _maxBounceAngle = 60f;
         [SerializeField] private float _additionalSpeedAfterCollision = 0.2f;
-        
-        private Vector2 _velocity;
-        private float _actualSpeed;
-
-        private void Start()
-        {
-            Reset();
-        }
 
         // 0 (left side won) = direction right, 1 (right side won) = direction left
         public void Launch(int direction)
         {
-            UpdateVelocity(_actualSpeed * (Mathf.Sign(direction) * Vector2.one.normalized));
+            Move(Mathf.Sign(direction) * Vector2.one.normalized);
         }
-
-        public void Reset()
-        {
-            UpdateVelocity(Vector2.zero);
-            transform.position = Vector3.zero;
-            _actualSpeed = baseSpeed;
-        }
-
+        
         private void OnTriggerEnter2D(Collider2D other)
         {
             if(other is null) return;
@@ -48,7 +33,7 @@ namespace Twode.Pong
             
             if(other.collider.CompareTag("Paddle"))
             {
-                _actualSpeed += _additionalSpeedAfterCollision;
+                Speed += _additionalSpeedAfterCollision;
                 
                 Bounds paddleBounds = other.collider.bounds;
                 Vector2 contactPoint = other.contacts[0].point;
@@ -58,25 +43,9 @@ namespace Twode.Pong
                 float normalizedRelativeIntersectionY = relativeIntersectY / paddleBounds.extents.y; 
                 float bounceAngle = normalizedRelativeIntersectionY * _maxBounceAngle * Mathf.Deg2Rad;
                 
-                Vector2 newDirection = new Vector2(Mathf.Sign(_velocity.x) * -1, Mathf.Sin(bounceAngle)).normalized;
-                UpdateVelocity(newDirection * _actualSpeed);
+                Vector2 newDirection = new Vector2(Mathf.Sign(Velocity.x) * -1, Mathf.Sin(bounceAngle));
+                Move(newDirection);
             }
-        }
-
-        protected override void OnFreeze()
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
-
-        protected override void OnUnfreeze()
-        {
-            rb.linearVelocity = _velocity;
-        }
-
-        private void UpdateVelocity(Vector2 velocity)
-        {
-            _velocity = velocity;
-            rb.linearVelocity = _velocity;
         }
     }
 }

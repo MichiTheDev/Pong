@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using TwodeUtils;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Twode.Pong
 {
@@ -23,12 +24,12 @@ namespace Twode.Pong
         public GameState GameState { get; private set; } = GameState.Idle;
         
         [SerializeField] private Ball _ballPrefab;
-        [SerializeField] private Paddle _paddlePrefab;
+        [SerializeField] private Paddle paddlePrefab;
 
         [NotNull] private GameInput _input = null!;
         
-        private Paddle _leftPaddle;
-        private Paddle _rightPaddle;
+        private IPaddleController _leftPaddleController;
+        private IPaddleController _rightPaddleController;
         private Ball _ball;
         
         private int _leftScore;
@@ -97,22 +98,22 @@ namespace Twode.Pong
 
         private void ResetObjects()
         {
-            _leftPaddle?.ResetObject();
-            _rightPaddle?.ResetObject();
+            _leftPaddleController?.Paddle?.ResetObject();
+            _rightPaddleController?.Paddle?.ResetObject();
             _ball?.ResetObject();
         }
 
         private void FreezeObjects()
         {
-            _leftPaddle?.Freeze();
-            _rightPaddle?.Freeze();
+            _leftPaddleController?.Paddle?.Freeze();
+            _rightPaddleController?.Paddle?.Freeze();
             _ball?.Freeze();
         }
 
         private void UnfreezeObjects()
         {
-            _leftPaddle?.Unfreeze();
-            _rightPaddle?.Unfreeze();
+            _leftPaddleController?.Paddle?.Unfreeze();
+            _rightPaddleController?.Paddle?.Unfreeze();
             _ball?.Unfreeze();
         }
 
@@ -150,17 +151,16 @@ namespace Twode.Pong
 
         private void InitializeLevel()
         {
-            if(_ballPrefab is null || _paddlePrefab is null)
+            if(_ballPrefab is null || paddlePrefab is null)
             {
                 Debug.LogError("Ball or Paddle was not set in editor. Level cannot be initialized.");
                 return;
             }
             
-            SpawnLevel();
-            ConfigureInput();
+            SpawnLevelAndConfigureInput();
         }
 
-        private void SpawnLevel()
+        private void SpawnLevelAndConfigureInput()
         {
             Camera cam = Camera.main;
             if(cam is null)
@@ -173,22 +173,17 @@ namespace Twode.Pong
             float screenWidth = screenHeight * cam.aspect;
             float halfScreenHeight = screenHeight / 2.0f;
             float halfScreenWidth = screenWidth / 2.0f;
-
-            SpawnPaddles();
+            
+            _input = new GameInput();
+            _input.Enable();
+            
             SpawnBall();
             SpawnGoals();
             SpawnLevelBorders();
+            SpawnAndConfigurePaddles();
+            ConfigureGameInput();
             
             return;
-            void SpawnPaddles()
-            {
-                 Vector3 leftSpawnPosition = new Vector3(-halfScreenWidth + PADDLE_SPAWN_PADDING, 0);
-                 Vector3 rightSpawnPosition = new Vector3(halfScreenWidth - PADDLE_SPAWN_PADDING, 0);
-
-                _leftPaddle = Instantiate(_paddlePrefab, leftSpawnPosition, Quaternion.identity)!;
-                _rightPaddle = Instantiate(_paddlePrefab, rightSpawnPosition, Quaternion.identity)!;
-            }
-            
             void SpawnBall()
             {
                 _ball = Instantiate(_ballPrefab);
@@ -218,9 +213,11 @@ namespace Twode.Pong
             {
                 GameObject topBorder = new GameObject("Top Border");
                 topBorder.transform.position = new Vector3(0f, halfScreenHeight + 0.5f);
+                topBorder.tag = "Border";
                 
                 GameObject bottomBorder = new GameObject("Bottom Border");
                 bottomBorder.transform.position = new Vector3(0f, -halfScreenHeight - 0.5f);
+                bottomBorder.tag = "Border";
                 
                 BoxCollider2D topCollider = topBorder.AddComponent<BoxCollider2D>()!;
                 topCollider.size = new Vector2(screenWidth, 1f);
@@ -228,31 +225,38 @@ namespace Twode.Pong
                 BoxCollider2D bottomCollider = bottomBorder.AddComponent<BoxCollider2D>()!;
                 bottomCollider.size = new Vector2(screenWidth, 1f);
             }
-        }
-
-        private void ConfigureInput()
-        {
-            _input = new GameInput();
-            _input.Enable();
             
-            ConfigurePaddleInput();
-            SetPaddleInputEnabled(false);
-            ConfigureGameInput();
-
-            return;
-            void ConfigurePaddleInput()
+            void SpawnAndConfigurePaddles()
             {
-                _leftPaddle!.SetMovementInputActions(_input.LeftPlayer.Movement);
+                Vector3 leftSpawnPosition = new Vector3(-halfScreenWidth + PADDLE_SPAWN_PADDING, 0);
+                Vector3 rightSpawnPosition = new Vector3(halfScreenWidth - PADDLE_SPAWN_PADDING, 0);
+
+                Paddle leftPaddle = Instantiate(paddlePrefab, leftSpawnPosition, Quaternion.identity)!;
+                Paddle rightPaddle = Instantiate(paddlePrefab, rightSpawnPosition, Quaternion.identity)!;
+
+                PlayerPaddleController leftPaddleController = leftPaddle.gameObject.AddComponent<PlayerPaddleController>()!;
+                _leftPaddleController = leftPaddleController;
+                leftPaddleController.SetMovementInputActions(_input.LeftPlayer.Movement);
+                _leftPaddleController.Paddle = leftPaddle;
                 
                 if(GameManager.Instance!.GameMode == GameMode.PvP)
                 {
-                    _rightPaddle!.SetMovementInputActions(_input.RightPlayer.Movement);
-                    return;
+                    PlayerPaddleController rightPaddleController = rightPaddle.gameObject.AddComponent<PlayerPaddleController>()!;
+                    _rightPaddleController = rightPaddleController;
+                    rightPaddleController.SetMovementInputActions(_input.RightPlayer.Movement);
                 }
+                else
+                {
+                    AIPaddleController rightAIPaddleController = rightPaddle.gameObject.AddComponent<AIPaddleController>();
+                    rightAIPaddleController?.SetTarget(_ball!.transform);
+                    _rightPaddleController = rightAIPaddleController;
+                }
+                _rightPaddleController!.Paddle = rightPaddle;
                 
-                _rightPaddle!.EnableAI();
+                _leftPaddleController.SetInputEnabled(false);
+                _rightPaddleController.SetInputEnabled(false);
             }
-
+            
             void ConfigureGameInput()
             {
                 InputAction startGameAction = _input.Game.StartGame;
@@ -285,8 +289,8 @@ namespace Twode.Pong
 
         private void SetPaddleInputEnabled(bool inputEnabled)
         {
-            _leftPaddle?.SetInputEnabled(inputEnabled);
-            _rightPaddle?.SetInputEnabled(inputEnabled);
+            _leftPaddleController?.SetInputEnabled(inputEnabled);
+            _rightPaddleController?.SetInputEnabled(inputEnabled);
         }
     }
 }

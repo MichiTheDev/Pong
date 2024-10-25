@@ -635,7 +635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _ballPrefab: {fileID: 7662095637689470607, guid: 985ddb8f597e4bb41a9b14e2ab0c8705, type: 3}
-  _paddlePrefab: {fileID: 5606437005113554530, guid: eae55d3a311dbe2489fec10b6b8ba246, type: 3}
+  paddlePrefab: {fileID: 5606437005113554530, guid: eae55d3a311dbe2489fec10b6b8ba246, type: 3}
 --- !u!1 &1208620677
 GameObject:
   m_ObjectHideFlags: 0

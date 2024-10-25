@@ -47,9 +47,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d07ce5e244ebcc741989bf151dd23cbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseSpeed: 6
-  _maxBounceAngle: 60
-  _additionalSpeedAfterCollision: 0.25
+  _baseSpeed: 6.5
+  _maxBounceAngle: 45
+  _speedPerCollision: 0.25
 --- !u!212 &3083890824026073001
 SpriteRenderer:
   m_ObjectHideFlags: 0
